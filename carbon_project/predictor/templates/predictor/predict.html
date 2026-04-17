@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLogistics | Enterprise Carbon Analytics</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{% static 'predictor/style.css' %}">
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>EcoLogistics Analytics</h1>
+        <p>AI-Driven Supply Chain Emissions Engine</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %} 
+        
+        <div class="form-group">
+            <label for="weight">Cargo Weight (Tons)</label>
+            <input type="number" step="0.1" name="weight" id="weight" required placeholder="Enter weight in tons (e.g., 15.5)" value="{{ weight }}">
+        </div>
+
+        <div class="form-group">
+            <label for="distance">Route Distance (km)</label>
+            <input type="number" step="0.1" name="distance" id="distance" required placeholder="Enter distance in km (e.g., 1200)" value="{{ distance }}">
+        </div>
+
+        <div class="form-group">
+            <label for="transport_mode">Logistics Method</label>
+            <select name="transport_mode" id="transport_mode">
+                <option value="Truck" {% if mode == 'Truck' %}selected{% endif %}>Highway Transit (Truck)</option>
+                <option value="Rail" {% if mode == 'Rail' %}selected{% endif %}>Freight Rail</option>
+                <option value="Sea" {% if mode == 'Sea' %}selected{% endif %}>Maritime Freight (Sea)</option>
+                <option value="Air" {% if mode == 'Air' %}selected{% endif %}>Aviation Freight (Air)</option>
+            </select>
+        </div>
+
+        <button type="submit">Execute Carbon Analysis</button>
+    </form>
+
+    {% if prediction is not None %}
+    <div class="result-section">
+        <div class="result-header">Analysis Output</div>
+        
+        <div class="big-number-container">
+            <h2 class="big-number">{{ prediction }}</h2>
+            <div class="number-label">Total Estimated kg CO2e for {{ weight }} tons via {{ mode }} over {{ distance }} km</div>
+        </div>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value">{{ trees }}</div>
+                <div class="metric-label">Tree Offsets Req. (1 Yr)</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ car_miles }}</div>
+                <div class="metric-label">Equivalent Car Miles</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value">{{ home_days }}</div>
+                <div class="metric-label">Home Power Days</div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="emissionChart"></canvas>
+        </div>
+
+        <script>
+            const ctx = document.getElementById('emissionChart').getContext('2d');
+            const labels = {{ chart_labels|safe }};
+            const dataValues = {{ chart_data|safe }};
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dataValues,
+                        backgroundColor: ['#94a3b8', '#94a3b8', '#94a3b8', '#ef4444'],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Emissions Variance by Logistics Method',
+                            color: '#64748b',
+                            font: { family: "'Inter', sans-serif", size: 14, weight: 500 }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { family: "'Inter', sans-serif" }, color: '#64748b' },
+                            title: {
+                                display: true,
+                                text: 'Mode of Transport',
+                                color: '#64748b',
+                                font: { size: 13, weight: '600', family: "'Inter', sans-serif" }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { family: "'Inter', sans-serif" }, color: '#64748b' },
+                            title: {
+                                display: true,
+                                text: 'Estimated Emissions (kg CO2e)',
+                                color: '#64748b',
+                                font: { size: 13, weight: '600', family: "'Inter', sans-serif" }
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

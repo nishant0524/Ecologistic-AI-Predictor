@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # The MySQL Database Container
+  db:
+    image: mysql:8.0
+    container_name: ecologistics_db
+    environment:
+      MYSQL_DATABASE: ecologistics
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+
+  # The Django Web Application Container
+  web:
+    build: .
+    container_name: ecologistics_web
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=ecologistics
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

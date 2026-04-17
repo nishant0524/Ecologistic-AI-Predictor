@@ -1,0 +1,25 @@
+# 1. Use an official, lightweight Python runtime
+FROM python:3.10-slim-bullseye
+
+# 2. Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
+# 3. Set the base working directory inside the container
+WORKDIR /app
+
+# 4. Copy the requirements file and install dependencies
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 5. Copy the entire AINN_PROJECT folder into the container
+COPY . /app/
+
+# 6. Step inside the specific folder where manage.py lives
+WORKDIR /app/carbon_project
+
+# 7. Expose the port Django runs on
+EXPOSE 8080
+
+# 8. Start the Django server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8080"]
