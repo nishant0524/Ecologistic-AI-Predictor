@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-bon=iq$u(b=+x^ufmtj*fp97nae#18l9g-48#lbh-k@^(hddyl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['52.51.150.204', 'localhost', '127.0.0.1', '0.0.0.0','108.129.95.37']
 
 
 # Application definition
@@ -76,10 +77,10 @@ WSGI_APPLICATION = 'carbon_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ecologistics_db',        
+        'NAME': 'ecologistics',        
         'USER': 'root',                   
         'PASSWORD': 'root',  # <-- Put your actual MySQL password here!
-        'HOST': 'localhost',
+        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
         'PORT': '3306',
     }
 }

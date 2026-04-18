@@ -12,7 +12,15 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-    restart: unless-stopped
+    networks:
+      - web-app
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping","-h","localhost","-uroot","-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # The Django Web Application Container
   web:
@@ -22,14 +30,26 @@ services:
       - .:/app
     ports:
       - "8080:8080"
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8080"
     depends_on:
       - db
     environment:
       - DB_HOST=db
       - DB_NAME=ecologistics
       - DB_USER=root
-      - DB_PASSWORD=rootpassword
-    restart: unless-stopped
+      - DB_PASSWORD=root
+    restart: always
+    networks:
+      - web-app
+    healthcheck:
+      test: ["CMD-SHELL","curl -f http://localhost:8080/admin || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
 volumes:
   mysql_data:
+
+networks:
+  web-app:
